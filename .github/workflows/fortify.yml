@@ -16,9 +16,9 @@ name: Fortify AST Scan
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ "Gartner-demo" ]
+    branches: [ "Gartner2026-demo" ]
   push:
-    branches: [ "Gartner-demo" ]
+    branches: [ "Gartner2026-demo" ]
 
 jobs:
   Fortify-AST-Scan:
