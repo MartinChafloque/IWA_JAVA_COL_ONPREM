@@ -85,9 +85,39 @@ public class UrlAuthenticationSuccessHandler implements AuthenticationSuccessHan
 
         boolean isUser = false;
         boolean isAdmin = false;
-        String targetUrl = request.getParameter("referer");
-        //if (targetUrl.endsWith("/")) targetUrl = targetUrl.substring(0, targetUrl.length());
-        String targetPath = new URL(targetUrl).getPath();
+        String refererParam = request.getParameter("referer");
+        String targetUrl = "/";
+        String targetPath = "/";
+        
+        // Validate referer is a relative path or same-origin URL
+        if (refererParam != null && !refererParam.isEmpty()) {
+            try {
+                if (refererParam.startsWith("/")) {
+                    // Relative path - safe to use
+                    targetPath = refererParam;
+                    targetUrl = refererParam;
+                } else {
+                    // Absolute URL - validate it's same origin
+                    URL refererUrl = new URL(refererParam);
+                    URL requestUrl = new URL(request.getRequestURL().toString());
+                    if (refererUrl.getHost().equals(requestUrl.getHost()) && 
+                        refererUrl.getProtocol().equals(requestUrl.getProtocol()) &&
+                        refererUrl.getPort() == requestUrl.getPort()) {
+                        targetPath = refererUrl.getPath();
+                        targetUrl = refererParam;
+                    } else {
+                        // External URL - reject and use default
+                        log.warn("Rejecting external referer URL: " + refererParam);
+                        targetPath = "/";
+                        targetUrl = "/";
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Invalid referer URL: " + refererParam, e);
+                targetPath = "/";
+                targetUrl = "/";
+            }
+        }
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         for (GrantedAuthority grantedAuthority : authorities) {

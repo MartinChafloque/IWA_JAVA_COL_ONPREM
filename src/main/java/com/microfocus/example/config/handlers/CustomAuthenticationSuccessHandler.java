@@ -98,24 +98,49 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                 log.debug("No loginReferer; redirecting to users home page");
                 targetUrl = USER_HOME_URL;
             } else {
-                targetUrl = loginReferer;
                 String targetPath = null;
                 try {
-                    targetPath = new URL(targetUrl).getPath();
+                    URL url = new URL(loginReferer);
+                    // Validate that the URL is from the same host
+                    String requestHost = request.getServerName();
+                    String refererHost = url.getHost();
+                    if (refererHost != null && !refererHost.equals(requestHost)) {
+                        log.warn("Referer host mismatch. Expected: " + requestHost + ", Got: " + refererHost);
+                        targetUrl = USER_HOME_URL;
+                    } else {
+                        targetPath = url.getPath();
+                        targetUrl = targetPath;
+                        if (targetUrl.contains("?")) targetUrl = targetUrl.substring(0, targetUrl.indexOf("?"));
+                        if (targetPath.endsWith("/cart")) {
+                            targetUrl = targetUrl.replace("/cart", "/cart/checkout");
+                        } else if (targetPath.endsWith("/login")) {
+                            targetUrl = targetUrl.replace("/login", "/user");
+                        } else if (targetPath.endsWith("/register")) {
+                            targetUrl = targetUrl.replace("/register", "/");
+                        } else if (targetPath.equals("/")) {
+                            targetUrl = targetUrl + "user";
+                        }
+                    }
                 } catch (MalformedURLException ex) {
                     log.error(ex.getLocalizedMessage());
+                    // If URL is malformed, treat as relative path
+                    targetPath = loginReferer;
+                    if (targetPath.startsWith("/")) {
+                        targetUrl = targetPath;
+                        if (targetUrl.contains("?")) targetUrl = targetUrl.substring(0, targetUrl.indexOf("?"));
+                        if (targetPath.endsWith("/cart")) {
+                            targetUrl = targetUrl.replace("/cart", "/cart/checkout");
+                        } else if (targetPath.endsWith("/login")) {
+                            targetUrl = targetUrl.replace("/login", "/user");
+                        } else if (targetPath.endsWith("/register")) {
+                            targetUrl = targetUrl.replace("/register", "/");
+                        } else if (targetPath.equals("/")) {
+                            targetUrl = targetUrl + "user";
+                        }
+                    } else {
+                        targetUrl = USER_HOME_URL;
+                    }
                 }
-                if (targetUrl.contains("?")) targetUrl = targetUrl.substring(0, targetUrl.indexOf("?"));
-                if (targetPath.endsWith("/cart")) {
-                    targetUrl = targetUrl.replace("/cart", "/cart/checkout");
-                } else if (targetPath.endsWith("/login")) {
-                    targetUrl = targetUrl.replace("/login", "/user");
-                } else if (targetPath.endsWith("/register")) {
-                    targetUrl = targetUrl.replace("/register", "/");
-                } else if (targetPath.equals("/")) {
-                    targetUrl = targetUrl + "user";
-                }
-
             }
         }
         return targetUrl;
