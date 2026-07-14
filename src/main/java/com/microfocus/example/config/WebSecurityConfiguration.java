@@ -128,7 +128,9 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                     .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                     //.and().httpBasic().authenticationEntryPoint(basicAuthenticationEntryPoint)
                     .and().exceptionHandling().accessDeniedHandler(apiAccessDeniedHandler)
-                    .and().csrf().disable();
+                    .and().csrf().disable()
+                    .headers()
+                    .contentSecurityPolicy("default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'");
 
             httpSecurity.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
@@ -145,7 +147,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
             if (activeProfile.contains("dev")) {
                 log.info("Running development profile");
                 httpSecurity.csrf().disable();
-                httpSecurity.headers().frameOptions().disable();
+                // Frame options protection enabled (using Spring Security defaults)
                 httpSecurity.cors().disable();
                 httpSecurity.headers().xssProtection().disable();
             }
