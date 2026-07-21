@@ -50,7 +50,7 @@ jobs:
           # SETUP_ACTION: https://scm.my.org/shared-repos/fcli-actions/setup.yaml
           # SETUP_EXTRA_OPTS: --on-unsigned=ignore
           # SC_CLIENT_VERSION: 24.4.1
-          # DO_PACKAGE_DEBUG: true
+          DO_PACKAGE_DEBUG: true
           # PACKAGE_EXTRA_OPTS: -oss -bt mvn
           SC_SAST_SENSOR_VERSION: 26.2.0
           # EXTRA_SC_SAST_SCAN_OPTS: 
