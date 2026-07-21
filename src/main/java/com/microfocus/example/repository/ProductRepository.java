@@ -53,7 +53,6 @@ public class ProductRepository {
         String sqlQuery = "select * from products LIMIT ? OFFSET ?";
         return jdbcTemplate.query(sqlQuery, new ProductMapper(), limit, offset);
     }
-    }
 
     public List<Product> findAvailable(int offset, int limit) {
         String sqlQuery = "select * from products" +
