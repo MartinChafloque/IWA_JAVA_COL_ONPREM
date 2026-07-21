@@ -96,7 +96,6 @@ public class ProductController extends AbstractBaseController {
         String retContent = "Product search using: " + encodedKeywords;
         return ResponseEntity.ok().body(retContent);
     }
-    }
 
     @GetMapping("/firstaid")
     public String firstaid(Model model, @Param("keywords") String keywords, @Param("limit") Integer limit, Principal principal) {
