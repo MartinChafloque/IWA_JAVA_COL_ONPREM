@@ -1,3 +1,4 @@
+
 ################################################################################################################################################
 # Fortify lets you build secure software fast with an appsec platform that automates testing throughout the DevSecOps pipeline. Fortify static,#
 # dynamic, interactive, and runtime security testing is available on premises or as a service. To learn more about Fortify, start a free trial #
@@ -16,42 +17,55 @@ name: Fortify AST Scan
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ "Gartner2026-demo" ]
+    branches: [ "main" ]
   push:
-    branches: [ "Gartner2026-demo" ]
+    branches: [ "main" ]
 
 jobs:
   Fortify-AST-Scan:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       actions: read
-      contents: write
+      contents: read
       security-events: write
-      pull-requests: write
-      
+
     steps:
       # Check out source code
       - name: Check Out Source Code
-        uses: actions/checkout@v7
+        uses: actions/checkout@v6
 
-      # Java is required to build IWA-Java
-      - name: Setup Java
-        uses: actions/setup-java@v5
+      # Perform Fortify on Demand SAST + SCA scan and import SAST results into GitHub code scanning alerts
+      - name: Run SAST Scan
+        uses: fortify/github-action@v2
         with:
-          java-version: 17
-          distribution: 'temurin'
-
-      # Perform Fortify scan, audit, remediation, and policy check.
-      - name: Run FoD SAST+SCA Scan
-        uses: fortify/github-action@v3
-        env:       
-          FOD_URL: https://ams.fortify.com
-          FOD_TENANT: ${{secrets.FOD_GARTNER_TENANT}}
-          FOD_CLIENT_ID: ${{secrets.FOD_GARTNER_CLIENT_ID}}
-          FOD_CLIENT_SECRET: ${{secrets.FOD_GARTNER_CLIENT_SECRET}}
-          DO_SAST_SCAN: true            # Run SAST scan (default)
-          DO_SCA_SCAN: true             # Run SCA scan
-          DO_AVIATOR_AUDIT: true        # AI-assisted audit of scan results
-          DO_AVIATOR_REMEDIATIONS: true # AI-assisted remediation PR generation
-          DO_CHECK_POLICY: true         # Fail workflow if security policy is violated
-
+          sast-scan: true
+        env:
+          SSC_URL: ${{vars.SSC_URL}}
+          SSC_TOKEN: ${{secrets.SSC_TOKEN}}
+          SC_SAST_TOKEN: ${{secrets.SC_SAST_CLIENT_AUTH_TOKEN}}
+          # SSC_LOGIN_EXTRA_OPTS: --socket-timeout=60s
+          # DEBRICKED_TOKEN: ${{secrets.DEBRICKED_TOKEN}}
+          SSC_APPVERSION: IWA_JAVA_COL:github
+          # DO_SETUP: true
+          # SETUP_ACTION: https://scm.my.org/shared-repos/fcli-actions/setup.yaml
+          # SETUP_EXTRA_OPTS: --on-unsigned=ignore
+          # SC_CLIENT_VERSION: 24.4.1
+          # DO_PACKAGE_DEBUG: true
+          # PACKAGE_EXTRA_OPTS: -oss -bt mvn
+          SC_SAST_SENSOR_VERSION: 26.2.0
+          # EXTRA_SC_SAST_SCAN_OPTS: 
+          # DO_DEBRICKED_SCAN: true
+          # DO_WAIT: true
+          # DO_POLICY_CHECK: true
+          # POLICY_CHECK_ACTION: https://scm.my.org/shared-repos/fcli-actions/check-policy.yaml
+          # POLICY_CHECK_EXTRA_OPTS: --on-unsigned=ignore
+          # DO_JOB_SUMMARY: true
+          # JOB_SUMMARY_ACTION: https://scm.my.org/shared-repos/fcli-actions/job-summary.yaml
+          # JOB_SUMMARY_EXTRA_OPTS: --on-unsigned=ignore
+          # DO_PR_COMMENT: true
+          # PR_COMMENT_ACTION: https://scm.my.org/shared-repos/fcli-actions/github-pr-comment.yaml
+          # PR_COMMENT_EXTRA_OPTS: --on-unsigned=ignore
+          # DO_EXPORT: true
+          # EXPORT_ACTION: https://scm.my.org/shared-repos/fcli-actions/github-sast-report.yaml
+          # EXPORT_EXTRA_OPTS: --on-unsigned=ignore
+          # TOOL_DEFINITIONS: https://ftfy.mycompany.com/tool-definitions/v1/tool-definitions.yaml.zip
