@@ -87,10 +87,15 @@ public class ProductController extends AbstractBaseController {
     @GetMapping("/xss")
     @ResponseBody
     public ResponseEntity<String> getKeywordsContent(@Param("keywords") String keywords) {
-
-    	String retContent = "Product search using: " + keywords;
-    	
+        String encodedKeywords = keywords != null ? 
+            keywords.replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+                    .replace("\"", "&quot;")
+                    .replace("'", "&#x27;") : "";
+        String retContent = "Product search using: " + encodedKeywords;
         return ResponseEntity.ok().body(retContent);
+    }
     }
 
     @GetMapping("/firstaid")
